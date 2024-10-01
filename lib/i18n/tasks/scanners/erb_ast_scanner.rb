@@ -13,6 +13,19 @@ module I18n::Tasks::Scanners
       @ruby_parser = LocalRubyParser.new(ignore_blocks: true)
     end
 
+    def absolute_key(key, path, roots: config[:relative_roots],
+                     exclude_method_name_paths: config[:relative_exclude_method_name_paths],
+                     exclude_duplicate_path_segments: config[:relative_exclude_duplicate_path_segments],
+                     calling_method: nil)
+      result = super(key, path, roots:, exclude_method_name_paths:, calling_method:)
+
+      if exclude_duplicate_path_segments.any? { |p| path.start_with?(p) }
+        result.gsub(/(\w+)\.(?=\1#{key})/, '')
+      else
+        result
+      end
+    end
+
     private
 
     # Parse file on path and returns AST and comments.
